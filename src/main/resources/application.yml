@@ -1,38 +1,7 @@
-spring:
-  kafka:
-    producer:
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    consumer:
-      auto-offset-reset: earliest
-      properties:
-        spring:
-          json:
-            trusted:
-              packages: '*'
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      enable-auto-commit: 'false'
-    bootstrap-servers: 127.0.0.1:9092
-  data:
-    mongodb:
-      host: localhost
-      port: 27018
-      username: rootuser
-      password: rootpass
-      authentication-database: admin
-      database: RMM
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-kafka:
-  group:
-    id: spring-boot-api-consumer
-logging:
-  level:
-    org:
-      springframework:
-        data: debug
-
 server:
   port: 8082
+
+agent:
+  ip: 185.165.117.108
+auth: 2eec3647c278b8b0468b0e4d7f8e9c582599f47df9923cf30ac0e1092f3caab7
+jsonrpc: 2.0
