@@ -12,7 +12,7 @@ public class ZabbixResultItemEntity {
 
     private String name;
 
-    private String lastValue;
+    private String lastvalue;
 
     public String getItemid() {
         return itemid;
@@ -30,11 +30,19 @@ public class ZabbixResultItemEntity {
         this.name = name;
     }
 
-    public String getLastValue() {
-        return lastValue;
+    public String getId() {
+        return id;
     }
 
-    public void setLastValue(String lastValue) {
-        this.lastValue = lastValue;
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getLastvalue() {
+        return lastvalue;
+    }
+
+    public void setLastvalue(String lastvalue) {
+        this.lastvalue = lastvalue;
     }
 }
