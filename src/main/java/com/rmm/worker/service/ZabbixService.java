@@ -36,6 +36,6 @@ public class ZabbixService {
     }
 
     public ZabbixResponseEntity findFirstByHostIdOrderByDate(String ip){
-        return zabbixRepository.findFirstByIpOrderByDate(ip);
+        return zabbixRepository.findFirstByIpOrderByDateDesc(ip);
     }
 }
