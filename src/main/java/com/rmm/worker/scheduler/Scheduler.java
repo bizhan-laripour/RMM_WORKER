@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -28,10 +29,13 @@ public class Scheduler {
         this.zabbixService = zabbixService;
     }
 
-    @Scheduled(fixedRate = 60000)
-    public void reportCurrentTime() {
+    @Scheduled(fixedRate = 100000)
+    public void getDeviceInformation() {
         HostIdResult host =  getIdByIp();
-        ZabbixResponseEntity result = getInformation(host.getResult().get(0).getHostid().toString());
+        ZabbixResponseEntity result = getInformation(host.getResult().get(0).getHostid());
+        result.setHostId(host.getResult().get(0).getHostid());
+        result.setIp(environment.getProperty("agent.ip"));
+        result.setDate(new Date());
         zabbixService.save(result);
         System.out.println("result saved");
     }

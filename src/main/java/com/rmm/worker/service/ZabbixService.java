@@ -34,4 +34,8 @@ public class ZabbixService {
     public void delete(ZabbixResponseEntity zabbixResponseEntity){
         zabbixRepository.delete(zabbixResponseEntity);
     }
+
+    public ZabbixResponseEntity findFirstByHostIdOrderByDate(String ip){
+        return zabbixRepository.findFirstByIpOrderByDate(ip);
+    }
 }

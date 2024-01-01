@@ -34,4 +34,9 @@ public class WorkerController {
     public ResponseEntity<?> findAll(){
         return new ResponseEntity<>(zabbixService.findAll() , HttpStatus.OK);
     }
+
+    @PostMapping(value = "find-by-ip")
+    public ResponseEntity<?> findFirstByHostIdOrderByDate(String hostId){
+        return new ResponseEntity<>(zabbixService.findFirstByHostIdOrderByDate(hostId) , HttpStatus.OK);
+    }
 }
