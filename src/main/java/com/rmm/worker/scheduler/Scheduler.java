@@ -29,7 +29,7 @@ public class Scheduler {
         this.zabbixService = zabbixService;
     }
 
-    @Scheduled(fixedRate = 900000)
+    @Scheduled(fixedRate = 60000)
     public void getDeviceInformation() {
         HostIdResult host =  getIdByIp();
         ZabbixResponseEntity result = getInformation(host.getResult().get(0).getHostid());
