@@ -1,7 +1,10 @@
 server:
   port: 8082
 
-agent:
-  ip: 185.165.117.108
 auth: 2eec3647c278b8b0468b0e4d7f8e9c582599f47df9923cf30ac0e1092f3caab7
 jsonrpc: 2.0
+
+agent:
+  ip:
+    from: 185.165.117.108
+    to: 185.165.117.125
