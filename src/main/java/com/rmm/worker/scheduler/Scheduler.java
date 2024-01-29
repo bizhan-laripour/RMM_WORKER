@@ -9,9 +9,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 @Component
 public class Scheduler {
@@ -23,25 +25,33 @@ public class Scheduler {
 
     private final ZabbixService zabbixService;
 
+    public static Map<String, String> ipTable = new HashMap<>();
+
     public Scheduler(Environment environment, ZabbixFeignClient zabbixFeignClient, ZabbixService zabbixService) {
         this.environment = environment;
         this.zabbixFeignClient = zabbixFeignClient;
         this.zabbixService = zabbixService;
+
     }
 
     @Scheduled(fixedRate = 60000)
-    public void getDeviceInformation() {
-        HostIdResult host =  getIdByIp();
-        ZabbixResponseEntity result = getInformation(host.getResult().get(0).getHostid());
-        result.setHostId(host.getResult().get(0).getHostid());
-        result.setIp(environment.getProperty("agent.ip"));
-        result.setDate(new Date());
-        zabbixService.save(result);
-        System.out.println("result saved");
+    public void getDeviceInformation() throws UnknownHostException {
+        if(ipTable.isEmpty()){
+            generate(environment.getProperty("agent.ip.from") , environment.getProperty("agent.ip.to"));
+        }
+        for (Map.Entry<String, String> entry : ipTable.entrySet()) {
+            System.out.println(entry.getKey() + ":" + entry.getValue());
+            ZabbixResponseEntity result = getInformation(entry.getValue());
+            result.setHostId(entry.getValue());
+            result.setIp(entry.getKey());
+            result.setDate(new Date());
+            zabbixService.save(result);
+            System.out.println("result saved");
+        }
     }
 
 
-    public ZabbixResponseEntity getInformation(String ip){
+    public ZabbixResponseEntity getInformation(String id) {
         ZabbixRequestDto zabbixRequestDto = new ZabbixRequestDto();
         ZabbixRequestParams zabbixRequestParams = new ZabbixRequestParams();
         List<String> output = new ArrayList<>();
@@ -49,7 +59,7 @@ public class Scheduler {
         output.add("name");
         output.add("lastvalue");
         List<Integer> hostids = new ArrayList<>();
-        hostids.add(Integer.parseInt(ip));
+        hostids.add(Integer.parseInt(id));
         zabbixRequestParams.setHostIds(hostids);
         zabbixRequestParams.setOutput(output);
         zabbixRequestDto.setAuth(environment.getProperty("auth"));
@@ -57,15 +67,15 @@ public class Scheduler {
         zabbixRequestDto.setParams(zabbixRequestParams);
         zabbixRequestDto.setMethod("item.get");
         zabbixRequestDto.setJsonrpc(environment.getProperty("jsonrpc"));
-       return zabbixFeignClient.getAllInformation(zabbixRequestDto);
+        return zabbixFeignClient.getAllInformation(zabbixRequestDto);
 
     }
 
-    public HostIdResult getIdByIp(){
+    public HostIdResult getIdByIp(String ip) {
         HostIdDto hostIdDto = new HostIdDto();
         HostIdParams params = new HostIdParams();
         Filter filter = new Filter();
-        filter.setIp(environment.getProperty("agent.ip"));
+        filter.setIp(ip);
         params.setFilter(filter);
         List<String> output = new ArrayList<>();
         output.add("hostid");
@@ -77,5 +87,27 @@ public class Scheduler {
         hostIdDto.setMethod("host.get");
         hostIdDto.setParams(params);
         return zabbixFeignClient.getHostId(hostIdDto);
+    }
+
+    private int convertToInt(String address) throws UnknownHostException {
+        InetAddress inetAddress = Inet4Address.getByName(address);
+        return ByteBuffer.allocate(4).put(inetAddress.getAddress()).getInt(0);
+    }
+
+    // Convert an integer to an IP string
+    private String convertToIp(int address) throws UnknownHostException {
+        return Inet4Address.getByAddress(ByteBuffer.allocate(4).putInt(address).array()).getHostAddress();
+    }
+
+    public void generate(String address1, String address2) throws UnknownHostException {
+        int numeric1 = convertToInt(address1);
+        int numeric2 = convertToInt(address2);
+        for (int i = Math.min(numeric1, numeric2); i <= Math.max(numeric1, numeric2); i++) {
+            String ip = convertToIp(i);
+            HostIdResult hostIdResult = getIdByIp(ip);
+            if (hostIdResult != null || hostIdResult.getResult() != null || !hostIdResult.getResult().isEmpty()) {
+                ipTable.put(ip, hostIdResult.getResult().get(0).getHostid());
+            }
+        }
     }
 }
