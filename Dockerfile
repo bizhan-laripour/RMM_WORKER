@@ -15,4 +15,4 @@ FROM eclipse-temurin:17-jre-jammy
 ARG JAR_FILE=/usr/app/target/*.jar
 COPY --from=build $JAR_FILE /app/worker.jar
 EXPOSE 8082
-ENTRYPOINT java -jar /app/runner.jar
+ENTRYPOINT java -jar /app/worker.jar
