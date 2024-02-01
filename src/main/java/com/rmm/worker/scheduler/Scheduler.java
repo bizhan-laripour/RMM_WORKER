@@ -105,7 +105,7 @@ public class Scheduler {
         for (int i = Math.min(numeric1, numeric2); i <= Math.max(numeric1, numeric2); i++) {
             String ip = convertToIp(i);
             HostIdResult hostIdResult = getIdByIp(ip);
-            if (hostIdResult != null || hostIdResult.getResult() != null || !hostIdResult.getResult().isEmpty()) {
+            if (hostIdResult != null && !hostIdResult.getResult().isEmpty()) {
                 ipTable.put(ip, hostIdResult.getResult().get(0).getHostid());
             }
         }
