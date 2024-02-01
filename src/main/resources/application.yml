@@ -8,3 +8,7 @@ agent:
   ip:
     from: 185.165.117.108
     to: 185.165.117.125
+
+elastic:
+  server:
+    port: 127.0.0.1:9200
