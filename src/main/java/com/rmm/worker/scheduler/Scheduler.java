@@ -5,6 +5,7 @@ import com.rmm.worker.dto.*;
 import com.rmm.worker.entity.ZabbixResponseEntity;
 import com.rmm.worker.feign.ZabbixFeignClient;
 import com.rmm.worker.service.ZabbixService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,15 @@ public class Scheduler {
     private final ZabbixService zabbixService;
 
     public static Map<String, String> ipTable = new HashMap<>();
+    private List<String> externalIps = new ArrayList<>();
+
+    @PostConstruct
+    public void setExternalIps(){
+        String external = environment.getProperty("external.ip");
+        assert external != null;
+        String[] ips = external.split(",");
+        externalIps.addAll(Arrays.asList(ips));
+    }
 
     public Scheduler(Environment environment, ZabbixFeignClient zabbixFeignClient, ZabbixService zabbixService) {
         this.environment = environment;
@@ -37,6 +47,7 @@ public class Scheduler {
     @Scheduled(fixedRate = 60000)
     public void getDeviceInformation() throws UnknownHostException {
         if(ipTable.isEmpty()){
+            generateExternal(externalIps);
             generate(environment.getProperty("agent.ip.from") , environment.getProperty("agent.ip.to"));
         }
         for (Map.Entry<String, String> entry : ipTable.entrySet()) {
@@ -48,6 +59,17 @@ public class Scheduler {
             zabbixService.save(result);
             System.out.println("result saved");
         }
+    }
+
+
+    public void generateExternal(List<String> externalIps){
+        externalIps.forEach(obj -> {
+            HostIdResult hostIdResult = getIdByIp(obj);
+            if (hostIdResult != null && !hostIdResult.getResult().isEmpty()) {
+                ipTable.put(obj, hostIdResult.getResult().get(0).getHostid());
+            }
+        });
+
     }
 
 
