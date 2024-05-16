@@ -38,4 +38,8 @@ public class ZabbixService {
     public ZabbixResponseEntity findFirstByHostIdOrderByDate(String ip){
         return zabbixRepository.findFirstByIpOrderByDateDesc(ip);
     }
+
+    public List<ZabbixResponseEntity> findAllByIpOrderByDateDesc(String ip){
+        return zabbixRepository.findAllByIpOrderByDateDesc(ip , Limit.of(25));
+    }
 }
