@@ -10,6 +10,7 @@ import java.util.List;
 public interface ZabbixRepository extends ElasticsearchRepository<ZabbixResponseEntity, String> {
 
     ZabbixResponseEntity findFirstByIpOrderByDateDesc(String hostId);
+    List<ZabbixResponseEntity> findAllByIpOrderByDateDesc(String ip , Limit limit);
 
 
 }
